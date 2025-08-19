@@ -2,11 +2,11 @@
 
 [![Go Version](https://img.shields.io/badge/go-1.22+-blue.svg)](https://golang.org)
 
-A simple Go implementation of a Turing machine with support for custom programs.
+A simple Go implementation of a Turing machine.
 
 ## Features
 
-- Turing machine implementation with configurable alphabet, states, and transitions
+- Turing machine implementation with configurable alphabet and states.
 - Built-in verification mechanisms (infinite loop detection, step limits, tape size limits)
 - File-based program loading from `.tur` files
 - Examples (addition, multiplication, increment)
@@ -112,7 +112,7 @@ machine, err := turing.NewMachine("1xy", "Q1", "Q0", program, 1000, 1000)
 - `ErrUnexpectedSymbol`: Symbol not in machine's alphabet
 - `ErrTapeOver`: Tape exceeded maximum length
 
-### File Format (.tur files)
+## File Format (.tur files)
 
 Program file support https://kpolyakov.spb.ru/prog/turing.htm
 

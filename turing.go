@@ -1,6 +1,7 @@
 package turing
 
 import (
+	"context"
 	"errors"
 	"fmt"
 )
@@ -152,11 +153,20 @@ func NewMachine(
 	}, nil
 }
 
-// Exec method takes a carriage position and a tape as input,
-// performs calculations according to the program, and returns
-// the resulting tape if the algorithm completed without an error,
-// otherwise it returns an error.
+// Exec executes the Turing machine program with the starting carriage position
+// and input tape, returning the final tape state upon completion or an error
+// if execution fails.
 func (m *Machine) Exec(carriage int, input map[int]rune) (map[int]rune, error) {
+	return m.ExecCtx(context.Background(), carriage, input)
+}
+
+// ExecCtx executes the Turing machine program with the given context, starting carriage position,
+// and input tape. The method initializes the machine state, copies the input to the internal tape,
+// and runs the computation step by step until the machine halts or encounters an error.
+// The context allows for cancellation of long-running computations.
+// Returns the final tape state upon successful completion, or an error if the execution fails
+// or the context is cancelled.
+func (m *Machine) ExecCtx(ctx context.Context, carriage int, input map[int]rune) (map[int]rune, error) {
 	m.carriage = carriage
 	m.state = m.startState
 	m.steps = 0
@@ -174,6 +184,10 @@ func (m *Machine) Exec(carriage int, input map[int]rune) (map[int]rune, error) {
 	)
 
 	for ok {
+		if ctx.Err() != nil {
+			return nil, ctx.Err() //nolint:wrapcheck
+		}
+
 		ok, err = m.step()
 		if err != nil {
 			return nil, err

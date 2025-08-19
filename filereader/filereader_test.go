@@ -35,6 +35,19 @@ func TestReadFileCtx_ValidFileWithInput(t *testing.T) {
 }
 
 //nolint:paralleltest
+func TestReadFileCtx_ContextCancellation(t *testing.T) {
+	testFilePath := filepath.Join("testdata", "valid_turing_with_input.tur")
+	assert.FileExists(t, testFilePath)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	transitions, err := filereader.ReadFileCtx(ctx, testFilePath)
+	require.ErrorIs(t, err, context.Canceled)
+	assert.Nil(t, transitions)
+}
+
+//nolint:paralleltest
 func TestReadFileCtx_NoFile(t *testing.T) {
 	ctx := context.Background()
 	transitions, err := filereader.ReadFileCtx(ctx, "invalid_path")
