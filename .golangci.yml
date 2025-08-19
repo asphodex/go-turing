@@ -1,0 +1,27 @@
+version: "2"
+
+run:
+  modules-download-mode: readonly
+
+linters:
+  default: all
+  disable:
+    - wsl
+    - nonamedreturns
+    - cyclop
+    - depguard
+    - exhaustruct
+    - intrange
+    - nlreturn
+    - noinlineerr
+    - varnamelen
+    - funlen
+  settings:
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
