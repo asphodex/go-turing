@@ -50,9 +50,6 @@ func ReadFileCtx(ctx context.Context, filePath string) (program turing.Program, 
 var (
 	// ErrParseTransition is returned when a transition field cannot be parsed correctly.
 	ErrParseTransition = errors.New("parse transition")
-
-	// ErrNoTransitions is returned when the program file contains no valid transitions.
-	ErrNoTransitions = errors.New("no transitions")
 )
 
 // ParseTransition parse field like 1>Q2 and returns the decomposed parts of the field.
@@ -155,10 +152,6 @@ func ReadCtx(ctx context.Context, r io.Reader) (turing.Program, error) {
 
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("read program: %w", err)
-	}
-
-	if len(program) == 0 {
-		return nil, ErrNoTransitions
 	}
 
 	return program, nil

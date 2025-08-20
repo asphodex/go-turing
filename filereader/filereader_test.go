@@ -62,7 +62,7 @@ func TestReadCtx_InvalidData(t *testing.T) {
 
 	ctx := context.Background()
 	transitions, err := filereader.ReadCtx(ctx, strings.NewReader(data))
-	require.ErrorIs(t, err, filereader.ErrNoTransitions)
+	require.NoError(t, err)
 	assert.Empty(t, transitions)
 }
 
