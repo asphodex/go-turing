@@ -2,11 +2,12 @@ package turing_test
 
 import (
 	"context"
+	"strings"
+	"testing"
+
 	"github.com/asphodex/go-turing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"strings"
-	"testing"
 )
 
 func TestNewMachine_Valid(t *testing.T) {
@@ -458,4 +459,25 @@ func TestMachine_ExecCtx_ContextCancellation(t *testing.T) {
 
 	require.ErrorIs(t, err, context.Canceled)
 	assert.Nil(t, tape)
+}
+
+func TestMachine_Copy(t *testing.T) {
+	t.Parallel()
+
+	program := turing.Program{
+		"Q1": {' ': {NextState: "Q1", Move: turing.Left, Write: ' '}},
+	}
+
+	machine, err := turing.NewMachine(
+		"",
+		"Q1",
+		"Q0",
+		program,
+		10,
+		10000,
+	)
+	require.NoError(t, err)
+
+	newMachine := machine.Copy()
+	require.Equal(t, machine, newMachine)
 }

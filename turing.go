@@ -153,6 +153,21 @@ func NewMachine(
 	}, nil
 }
 
+func (m *Machine) Copy() *Machine {
+	return &Machine{
+		carriage:      m.carriage,
+		tape:          m.tape,
+		state:         m.state,
+		startState:    m.startState,
+		terminalState: m.terminalState,
+		alphabet:      m.alphabet,
+		program:       m.program,
+		steps:         m.steps,
+		maxTapeLength: m.maxTapeLength,
+		maxSteps:      m.maxSteps,
+	}
+}
+
 // Exec executes the Turing machine program with the starting carriage position
 // and input tape, returning the final tape state upon completion or an error
 // if execution fails.
