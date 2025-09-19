@@ -2,14 +2,15 @@ package filereader_test
 
 import (
 	"context"
-	"github.com/asphodex/go-turing"
-	"github.com/asphodex/go-turing/filereader"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/asphodex/go-turing"
+	"github.com/asphodex/go-turing/filereader"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 //nolint:paralleltest
@@ -18,9 +19,10 @@ func TestReadFileCtx_ValidFile(t *testing.T) {
 	assert.FileExists(t, testFilePath)
 
 	ctx := context.Background()
-	transitions, err := filereader.ReadFileCtx(ctx, testFilePath)
+	program, alphabet, err := filereader.ReadFileCtx(ctx, testFilePath)
 	require.NoError(t, err)
-	assert.Len(t, transitions, 34)
+	assert.Len(t, program, 34)
+	assert.NotEmpty(t, alphabet)
 }
 
 //nolint:paralleltest
@@ -29,9 +31,10 @@ func TestReadFileCtx_ValidFileWithInput(t *testing.T) {
 	assert.FileExists(t, testFilePath)
 
 	ctx := context.Background()
-	transitions, err := filereader.ReadFileCtx(ctx, testFilePath)
+	program, alphabet, err := filereader.ReadFileCtx(ctx, testFilePath)
 	require.NoError(t, err)
-	assert.Len(t, transitions, 71)
+	assert.Len(t, program, 71)
+	assert.NotEmpty(t, alphabet)
 }
 
 //nolint:paralleltest
@@ -42,17 +45,19 @@ func TestReadFileCtx_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	transitions, err := filereader.ReadFileCtx(ctx, testFilePath)
+	program, alphabet, err := filereader.ReadFileCtx(ctx, testFilePath)
 	require.ErrorIs(t, err, context.Canceled)
-	assert.Nil(t, transitions)
+	assert.Nil(t, program)
+	assert.Nil(t, alphabet)
 }
 
 //nolint:paralleltest
 func TestReadFileCtx_NoFile(t *testing.T) {
 	ctx := context.Background()
-	transitions, err := filereader.ReadFileCtx(ctx, "invalid_path")
+	program, alphabet, err := filereader.ReadFileCtx(ctx, "invalid_path")
 	require.ErrorIs(t, err, os.ErrNotExist)
-	assert.Nil(t, transitions)
+	assert.Nil(t, program)
+	assert.Nil(t, alphabet)
 }
 
 func TestReadCtx_InvalidData(t *testing.T) {
@@ -61,9 +66,10 @@ func TestReadCtx_InvalidData(t *testing.T) {
 	data := "Q1 Q2"
 
 	ctx := context.Background()
-	transitions, err := filereader.ReadCtx(ctx, strings.NewReader(data))
+	program, alphabet, err := filereader.ReadCtx(ctx, strings.NewReader(data))
 	require.NoError(t, err)
-	assert.Empty(t, transitions)
+	assert.Empty(t, program)
+	assert.Empty(t, alphabet)
 }
 
 func TestParseTransition(t *testing.T) {

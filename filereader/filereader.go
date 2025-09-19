@@ -17,27 +17,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/asphodex/go-turing"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/asphodex/go-turing"
 )
 
 // ReadFileCtx reads file from given filepath and returns turing.Program in case of success,
 // else returns an error.
-func ReadFileCtx(ctx context.Context, filePath string) (program turing.Program, err error) {
+func ReadFileCtx(ctx context.Context, filePath string) (program turing.Program, alphabet []rune, err error) {
 	path := filepath.Clean(filePath)
 
 	if _, err := os.Stat(path); err != nil {
-		return nil, fmt.Errorf("file %q does not exist: %w", path, err)
+		return nil, nil, fmt.Errorf("file %q does not exist: %w", path, err)
 	}
 
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("read file %q: %w", path, err)
+		return nil, nil, fmt.Errorf("read file %q: %w", path, err)
 	}
 
 	defer func() {
@@ -88,20 +89,21 @@ func ParseTransition(field string) (turing.Transition, error) {
 }
 
 // ReadCtx read .tur files from the given io.Reader.
-func ReadCtx(ctx context.Context, r io.Reader) (turing.Program, error) {
+func ReadCtx(ctx context.Context, r io.Reader) (turing.Program, []rune, error) {
 	scanner := bufio.NewScanner(r)
 
 	var (
-		program = make(turing.Program)
-		states  []string
-		inScope bool
+		program  = make(turing.Program)
+		states   []string
+		alphabet []rune
+		inScope  bool
 	)
 
 	statePattern := regexp.MustCompile(`Q\d+`)
 
 	for scanner.Scan() {
 		if ctx.Err() != nil {
-			return nil, ctx.Err() //nolint:wrapcheck
+			return nil, nil, ctx.Err() //nolint:wrapcheck
 		}
 
 		line := scanner.Text()
@@ -126,6 +128,7 @@ func ReadCtx(ctx context.Context, r io.Reader) (turing.Program, error) {
 		}
 
 		symbol, _ := utf8.DecodeRuneInString(fields[0])
+		alphabet = append(alphabet, symbol)
 
 		stateIndex := 0
 
@@ -137,7 +140,7 @@ func ReadCtx(ctx context.Context, r io.Reader) (turing.Program, error) {
 
 			transition, err := ParseTransition(fields[i])
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 
 			if _, ok := program[states[stateIndex]]; !ok {
@@ -151,8 +154,8 @@ func ReadCtx(ctx context.Context, r io.Reader) (turing.Program, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("read program: %w", err)
+		return nil, nil, fmt.Errorf("read program: %w", err)
 	}
 
-	return program, nil
+	return program, alphabet, nil
 }
