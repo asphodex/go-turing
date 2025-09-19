@@ -154,14 +154,33 @@ func NewMachine(
 }
 
 func (m *Machine) Copy() *Machine {
+	newTape := make(map[int]rune, len(m.tape))
+	for k, v := range m.tape {
+		newTape[k] = v
+	}
+
+	newAlphabet := make(map[rune]struct{}, len(m.alphabet))
+	for k, v := range m.alphabet {
+		newAlphabet[k] = v
+	}
+
+	newProgram := make(map[string]map[rune]Transition, len(m.program))
+	for state, transitions := range m.program {
+		newTransitions := make(map[rune]Transition, len(transitions))
+		for symbol, transition := range transitions {
+			newTransitions[symbol] = transition
+		}
+		newProgram[state] = newTransitions
+	}
+
 	return &Machine{
 		carriage:      m.carriage,
-		tape:          m.tape,
+		tape:          newTape,
 		state:         m.state,
 		startState:    m.startState,
 		terminalState: m.terminalState,
-		alphabet:      m.alphabet,
-		program:       m.program,
+		alphabet:      newAlphabet,
+		program:       newProgram,
 		steps:         m.steps,
 		maxTapeLength: m.maxTapeLength,
 		maxSteps:      m.maxSteps,
